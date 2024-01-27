@@ -20,11 +20,15 @@ our @EXPORT_OK = qw(
     plugin_output_data
     plugin_free
     plugin_reset
+    function_new
+    current_plugin_memory
+    current_plugin_memory_alloc
+    current_plugin_memory_length
+    current_plugin_memory_free
+    CopyToPtr
 );
 
 our %EXPORT_TAGS;
 $EXPORT_TAGS{all} = [@EXPORT_OK];
-
-
 
 1; # End of Extism::XS

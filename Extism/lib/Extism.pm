@@ -5,6 +5,21 @@ use strict;
 use warnings;
 use Extism::XS qw(version);
 use Extism::Plugin;
+use Extism::Function ':all';
+use Exporter 'import';
+
+our @EXPORT_OK = qw(
+  Extism_I32
+  Extism_I64
+  Extism_F32
+  Extism_F64
+  Extism_V128
+  Extism_FuncRef
+  Extism_ExternRef
+);
+
+our %EXPORT_TAGS;
+$EXPORT_TAGS{all} = [@EXPORT_OK];
 
 =head1 NAME
 

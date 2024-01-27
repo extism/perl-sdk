@@ -3,102 +3,31 @@ package Extism::CurrentPlugin;
 use 5.006;
 use strict;
 use warnings;
-
-=head1 NAME
-
-Extism::CurrentPlugin - The great new Extism::CurrentPlugin!
-
-=head1 VERSION
-
-Version 0.01
-
-=cut
+use Extism::XS qw(current_plugin_memory
+    current_plugin_memory_alloc
+    current_plugin_memory_length
+    current_plugin_memory_free);
 
 our $VERSION = '0.01';
 
+# These functions are only valid within a host function
+# instance is set by Extism::Function::host_function_caller_perl, valid only for
+# the host function.
 
-=head1 SYNOPSIS
-
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
-    use Extism::CurrentPlugin;
-
-    my $foo = Extism::CurrentPlugin->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
-
-=head2 function1
-
-=cut
-
-sub function1 {
+sub memory {
+    return current_plugin_memory($Extism::CurrentPlugin::instance);
 }
 
-=head2 function2
-
-=cut
-
-sub function2 {
+sub memory_alloc {
+    return current_plugin_memory_alloc($Extism::CurrentPlugin::instance);
 }
 
-=head1 AUTHOR
+sub memory_length {
+    return current_plugin_memory_length($Extism::CurrentPlugin::instance);
+}
 
-Gavin Hayes, C<< <gavin at dylibso.com> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to C<bug-extism at rt.cpan.org>, or through
-the web interface at L<https://rt.cpan.org/NoAuth/ReportBug.html?Queue=Extism>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Extism::CurrentPlugin
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=Extism>
-
-=item * CPAN Ratings
-
-L<https://cpanratings.perl.org/d/Extism>
-
-=item * Search CPAN
-
-L<https://metacpan.org/release/Extism>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
-
-
-=head1 LICENSE AND COPYRIGHT
-
-This software is copyright (c) 2024 by Gavin Hayes.
-
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
-
-
-=cut
+sub memory_free {
+    return current_plugin_memory_length($Extism::CurrentPlugin::instance);
+}
 
 1; # End of Extism::CurrentPlugin
