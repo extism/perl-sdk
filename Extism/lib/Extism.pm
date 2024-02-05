@@ -16,6 +16,7 @@ our @EXPORT_OK = qw(
   Extism_V128
   Extism_FuncRef
   Extism_ExternRef
+  Extism_String
 );
 
 our %EXPORT_TAGS;

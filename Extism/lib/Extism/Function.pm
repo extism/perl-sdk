@@ -3,6 +3,7 @@ package Extism::Function;
 use 5.006;
 use strict;
 use warnings;
+use feature 'say';
 use Extism::XS qw(
     function_new CopyToPtr);
 use Extism::CurrentPlugin;
@@ -22,6 +23,8 @@ use constant {
   Extism_V128 => 4,
   Extism_FuncRef => 5,
   Extism_ExternRef => 6,
+  # not a part of libextism, handled by this sdk
+  Extism_String => 7
 };
 
 our @EXPORT_OK = qw(
@@ -32,6 +35,7 @@ our @EXPORT_OK = qw(
   Extism_V128
   Extism_FuncRef
   Extism_ExternRef
+  Extism_String
 );
 
 our %EXPORT_TAGS;
@@ -42,11 +46,31 @@ $EXPORT_TAGS{all} = [@EXPORT_OK];
 sub new {
     my ($class, $name, $input_types, $output_types, $func) = @_;
     my %hostdata = (func => $func);
-    my $input_types_array = pack('L*', @{$input_types});
+    my @inputs = @{$input_types};
+    my @outputs = @{$output_types};
+    my %realtype = (inputs => [], outputs => []);
+    foreach my $input (@inputs) {
+      my $type;
+      if ($input == Extism_String) {
+        $type = $input;
+        $input = Extism_I64;
+      }
+      push @{$realtype{inputs}}, $type;
+    }
+    foreach my $output (@outputs) {
+      my $type;
+      if ($output == Extism_String) {
+        $type = $output;
+        $output = Extism_I64;
+      }
+      push @{$realtype{outputs}}, $type;
+    }
+    $hostdata{conversions} = \%realtype;
+    my $input_types_array = pack('L*', @inputs);
     my $input_types_ptr = unpack('Q', pack('P', $input_types_array));
-    my $output_types_array = pack('L*', @{$output_types});
+    my $output_types_array = pack('L*', @outputs);
     my $output_types_ptr = unpack('Q', pack('P', $output_types_array));
-    my $function = function_new($name, $input_types_ptr, scalar(@{$input_types}), $output_types_ptr, scalar(@{$output_types}), \%hostdata);
+    my $function = function_new($name, $input_types_ptr, scalar(@inputs), $output_types_ptr, scalar(@outputs), \%hostdata);
     bless \$function, $class
 }
 
@@ -59,7 +83,7 @@ sub load_raw_array {
 
 sub host_function_caller_perl {
     my ($current_plugin, $input_ptr, $input_len, $output_ptr, $output_len, $user_data) = @_;
-    print Dumper(\@_);
+    #print Dumper(\@_);
     local $Extism::CurrentPlugin::instance = $current_plugin;
     my $input_packed = \@{load_raw_array($input_ptr, 16, $input_len)};
     my @input = map {
@@ -76,8 +100,26 @@ sub host_function_caller_perl {
       }
       $value
     } @{$input_packed};
+    {
+        my $i = 0;
+        foreach my $item (@{$user_data->{conversions}{inputs}}) {
+          if (defined $item && $item == Extism_String) {
+            $input[$i] = Extism::CurrentPlugin::memory_load_from_handle($input[$i]);
+          }
+          $i++;
+        }
+    }
     my @outputs = $user_data->{func}(@input);
     scalar(@outputs) <= $output_len or croak "host function returned too many outputs";
+    {
+        my $i = 0;
+        foreach my $item (@{$user_data->{conversions}{outputs}}) {
+          if (defined $item && $item == Extism_String) {
+            $outputs[$i] = Extism::CurrentPlugin::memory_alloc_and_store($outputs[$i]);
+          }
+          $i++;
+        }
+    }
     my $outputs_packed = load_raw_array($output_ptr, 16, $output_len);
     my @output_types = map { unpack('L', $_) } @{$outputs_packed};
     my $output_array = unpack('P'.(16 * $output_len), pack('Q', $output_ptr));
