@@ -1,0 +1,14 @@
+Extism/host.wasm
+Extism/MYMETA.json
+Extism/MYMETA.yml
+Extism/Makefile
+Extism/blib/
+Extism/lib/Extism/XS.bs
+Extism/lib/Extism/XS.c
+Extism/lib/Extism/XS.o
+Extism/pm_to_blib
+Extism/script/demo-perl-extism-2
+Extism/script/demo-perl-extism-3
+Extism/MANIFEST
+Extism/MANIFEST.bak
+Extism/*.tar.gz

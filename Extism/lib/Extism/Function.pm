@@ -12,7 +12,7 @@ use Exporter 'import';
 use Carp qw(croak);
 use Data::Dumper;
 
-our $VERSION = '0.01';
+use version 0.77; our $VERSION = qv(v0.0.1);
 
 
 use constant {

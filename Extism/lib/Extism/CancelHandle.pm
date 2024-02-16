@@ -14,7 +14,7 @@ Version 0.01
 
 =cut
 
-our $VERSION = '0.01';
+use version 0.77; our $VERSION = qv(v0.0.1);
 
 
 =head1 SYNOPSIS
@@ -93,7 +93,7 @@ L<https://metacpan.org/release/Extism>
 
 =head1 LICENSE AND COPYRIGHT
 
-This software is copyright (c) 2024 by Gavin Hayes.
+This software is copyright (c) 2024 by Dylibso.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
