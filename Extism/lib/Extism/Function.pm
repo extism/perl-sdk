@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use feature 'say';
 use Extism::XS qw(
-    function_new CopyToPtr);
+    function_new function_free function_set_namespace CopyToPtr);
 use Extism::CurrentPlugin;
 use Devel::Peek qw(Dump);
 use Exporter 'import';
@@ -44,7 +44,7 @@ $EXPORT_TAGS{all} = [@EXPORT_OK];
 # [PTR_LENGTH, PTR_PAIR, SZ, JSON_PTR_LENGTH, JSON_PTR_PAIR, JSON_SZ, U8ARRAY_PTR_LENGTH, U8ARRAY_]
 
 sub new {
-    my ($class, $name, $input_types, $output_types, $func) = @_;
+    my ($class, $name, $input_types, $output_types, $func, $namespace) = @_;
     my %hostdata = (func => $func);
     my @inputs = @{$input_types};
     my @outputs = @{$output_types};
@@ -71,8 +71,23 @@ sub new {
     my $output_types_array = pack('L*', @outputs);
     my $output_types_ptr = unpack('Q', pack('P', $output_types_array));
     my $function = function_new($name, $input_types_ptr, scalar(@inputs), $output_types_ptr, scalar(@outputs), \%hostdata);
-    bless \$function, $class
+    $function or return undef;
+    my $functionref = bless \$function, $class;
+    defined $namespace and $functionref->($namespace);
+    return $functionref;
 }
+
+sub DESTROY {
+    my ($self) = @_;
+    $$self or return;
+    function_free($$self);
+}
+
+sub set_namespace {
+    my ($self, $namespace) = @_;
+    function_set_namespace($$self, $namespace);
+}
+
 
 sub load_raw_array {
   my ($ptr, $elm_size, $n) = @_;

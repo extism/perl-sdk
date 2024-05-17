@@ -5,28 +5,92 @@ use warnings;
 use Test::More;
 use Extism ':all';
 use JSON::PP qw(encode_json decode_json);
+use File::Temp qw(tempfile);
 use Devel::Peek qw(Dump);
-plan tests => 23;
+plan tests => 39;
 
+# ...
 ok(Extism::version());
 
-my $notplugin = Extism::Plugin->new('');
-ok(!defined $notplugin);
+# test custom log
+{
+    my $kid = fork();
+    if (defined $kid) {
+        if ($kid == 0) {
+            my $rc = 0;
+            Extism::log_custom("trace") or $rc = 1;
+            my $log_text;
+            my $tempfunc = sub {
+                $log_text .= $_[0];
+            };
+            Extism::Plugin->new('');
+            Extism::log_drain($tempfunc);
+            $log_text or $rc = 1;
+            POSIX::_exit($rc);
+        }
+        waitpid($kid, 0);
+        ok(($? >> 8) == 0);
+    }
+}
 
+# test failing plugin new in scalar and list context
+{
+    my $notplugin = Extism::Plugin->new('');
+    ok(!defined $notplugin);
+}
+{
+    my ($notplugin, $error) = Extism::Plugin->new('');
+    ok(!defined $notplugin);
+    ok($error);
+}
+
+# test succeeding plugin new in scalar and list context
+# also text various Plugin:: functions
 my $wasm = do { local(@ARGV, $/) = 'count_vowels.wasm'; <> };
-my $plugin = Extism::Plugin->new($wasm, {wasi => 1});
-ok($plugin);
-my $output = $plugin->call('count_vowels', "this is a test");
-ok($output);
-my $outputhash = decode_json($output);
-ok($outputhash->{count} == 4);
-ok($plugin->reset());
+{
+    my $plugin = Extism::Plugin->new($wasm, {wasi => 1});
+    ok($plugin);
+    my $output = $plugin->call('count_vowels', "this is a test");
+    ok($output);
+    my $outputhash = decode_json($output);
+    ok($outputhash->{count} == 4);
+    ok(length($plugin->id) == 16);
+    ok($plugin->function_exists('count_vowels'));
+    ok(!$plugin->function_exists('does_not_exist'));
+    ok($plugin->config({aaa => 'bbb'}));
+    ok($plugin->config({aaa => undef}));
+    my $ch = $plugin->cancel_handle();
+    ok($ch && $$ch);
+    ok($ch->cancel());
+    ok($plugin->reset());
+}
+{
+    my ($plugin, $error) = Extism::Plugin->new($wasm, {wasi => 1});
+    ok($plugin);
+    my ($output) = $plugin->call('count_vowels', "this is a test");
+    ok($output);
+    my $outputhash = decode_json($output);
+    ok($outputhash->{count} == 4);
+}
 
-my $failwasm = do { local(@ARGV, $/) = 'fail.wasm'; <> };
-my $failplugin = Extism::Plugin->new($failwasm, {wasi => 1});
-my $failed = $failplugin->call('run_test', "");
-ok(!$failed);
+# test log_file and call on failing plugin
+{
+    my ($error_fh, $filename) = tempfile();
+    Extism::log_file($filename, "error");
+    my $failwasm = do { local(@ARGV, $/) = 'fail.wasm'; <> };
+    my $failplugin = Extism::Plugin->new($failwasm, {wasi => 1});
+    my $failed = $failplugin->call('run_test', "");
+    ok(!$failed);
+    my $rc = read($error_fh, my $filler, 1);
+    ok($rc == 1);
+    unlink($filename);
+    Extism::log_file("/dev/stdout", "error");
+    my ($res, $rca, $info) = $failplugin->call('run_test', "");
+    ok($rca == 1);
+    is($info, 'Some error message');
+}
 
+# test basic host functions
 my $voidfunction = Extism::Function->new("hello_void", [], [], sub {
     print "hello_void\n";
     return;
@@ -43,6 +107,7 @@ ok($fplugin);
 ok(defined $fplugin->call('call_hello_void'));
 ok(defined $fplugin->call('call_hello_params'));
 
+# test more advanced host functions
 my $count_vowels_kv = encode_json({
     wasm => [
         {
@@ -51,6 +116,7 @@ my $count_vowels_kv = encode_json({
     ],
 });
 
+# ... with low level api
 my @lowlevel;
 {
     my %kv_store;
@@ -79,6 +145,7 @@ my @lowlevel;
     $lowlevel[1] = $fplugin->call("count_vowels", $hello);
 }
 
+# ... with high level api
 my @highlevel;
 {
     my %kv_store;
@@ -107,5 +174,7 @@ my @decoded = map {decode_json $_} @highlevel;
 ok($decoded[0]{count} == $decoded[1]{count} == 3);
 ok($decoded[0]{total} == 3);
 ok($decoded[1]{total} == 6);
+
+# Verify both sets of results are the same
 is($highlevel[0], $lowlevel[0]);
 is($highlevel[1], $lowlevel[1]);

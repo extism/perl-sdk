@@ -6,12 +6,18 @@ use warnings;
 use Extism::XS qw(
     plugin_new
     plugin_new_error_free
-    plugin_call plugin_error
+    plugin_call
+    plugin_error
     plugin_output_length
     plugin_output_data
     plugin_free
     plugin_reset
+    plugin_id
+    plugin_function_exists
+    plugin_config
+    plugin_cancel_handle
     );
+use Extism::Plugin::CancelHandle;
 use Data::Dumper qw(Dumper);
 use Devel::Peek qw(Dump);
 use JSON::PP qw(encode_json);
@@ -38,12 +44,13 @@ sub new {
     my $plugin = plugin_new($wasm, length($wasm), $functionsptr, scalar(@rawfunctions), $with_wasi, $errptrptr);
     if (! $plugin) {
         my $errmsg = unpack('p', $errptr);
-        print "error: $errmsg\n";
         plugin_new_error_free(unpack('Q', $errptr));
-        return undef;
+        return undef unless wantarray;
+        return (undef, $errmsg);
     }
     my $pluginobj = \$plugin;
-    return bless $pluginobj, $name;
+    my $realplugin = bless $pluginobj, $name;
+    return $realplugin;
 }
 
 # call PLUGIN,FUNCNAME,INPUT
@@ -61,9 +68,10 @@ sub call {
     }
     my $rc = plugin_call($$self, $func_name, $input, length($input));
     if ($rc != 0) {
-        print "error: " . plugin_error($$self) . "\n";
-        return undef;
+        return undef unless wantarray;
+        return (undef, $rc, plugin_error($$self));
     }
+    $rc == 0 or return undef;
     my $output_size = plugin_output_length($$self);
     my $output_ptr = plugin_output_data($$self);
     my $output = unpack('P'.$output_size, pack('Q', plugin_output_data($$self)));
@@ -73,6 +81,27 @@ sub call {
 sub reset {
     my ($self) = @_;
     return plugin_reset($$self);
+}
+
+sub id {
+    my ($self) = @_;
+    return unpack('P16', pack('Q', plugin_id($$self)));
+}
+
+sub function_exists {
+    my ($self, $funcname) = @_;
+    return plugin_function_exists($$self, $funcname);
+}
+
+sub config {
+    my ($self, $config) = @_;
+    return plugin_config($$self, encode_json($config));
+}
+
+sub cancel_handle {
+    my ($self) = @_;
+    my $raw_cancel_handle = plugin_cancel_handle($$self);
+    return Extism::Plugin::CancelHandle->new($raw_cancel_handle);
 }
 
 sub DESTROY {

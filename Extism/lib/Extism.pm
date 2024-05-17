@@ -3,10 +3,21 @@ package Extism;
 use 5.006;
 use strict;
 use warnings;
-use Extism::XS qw(version);
+use Extism::XS qw(version log_file);
 use Extism::Plugin;
 use Extism::Function ':all';
 use Exporter 'import';
+
+sub log_custom {
+  my ($level) = @_;
+  return Extism::XS::log_custom($level);
+}
+
+sub log_drain {
+  my ($func) = @_;
+  local *Extism::active_log_drain_func = $func;
+  return Extism::XS::log_drain();
+}
 
 our @EXPORT_OK = qw(
   Extism_I32

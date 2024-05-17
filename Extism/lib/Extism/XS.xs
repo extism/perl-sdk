@@ -14,6 +14,7 @@ typedef uint64_t ExtismMemoryHandle;
 typedef struct ExtismFunction ExtismFunction;
 typedef struct ExtismPlugin ExtismPlugin;
 typedef struct ExtismCurrentPlugin ExtismCurrentPlugin;
+typedef struct ExtismCancelHandle ExtismCancelHandle;
 
 typedef enum {
   Extism_I32,
@@ -49,6 +50,8 @@ typedef void (*ExtismFunctionType)(ExtismCurrentPlugin *plugin,
 
 static_assert(sizeof(UV) >= sizeof(ExtismSize));
 
+typedef void (*ExtismLogDrainFunctionType)(const char *data, ExtismSize size);
+
 ExtismPlugin *extism_plugin_new(const uint8_t *wasm,
                                 ExtismSize wasm_size,
                                 const ExtismFunction **functions,
@@ -73,6 +76,12 @@ void extism_plugin_free(ExtismPlugin *plugin);
 
 bool extism_plugin_reset(ExtismPlugin *plugin);
 
+const uint8_t *extism_plugin_id(ExtismPlugin *plugin);
+
+bool extism_plugin_function_exists(ExtismPlugin *plugin, const char *func_name);
+
+bool extism_plugin_config(ExtismPlugin *plugin, const uint8_t *json, ExtismSize json_size);
+
 ExtismFunction *extism_function_new(const char *name,
                                     const ExtismValType *inputs,
                                     ExtismSize n_inputs,
@@ -81,6 +90,10 @@ ExtismFunction *extism_function_new(const char *name,
                                     ExtismFunctionType func,
                                     void *user_data,
                                     void (*free_user_data)(void *_));
+
+void extism_function_free(ExtismFunction *f);
+
+void extism_function_set_namespace(ExtismFunction *ptr, const char *namespace_);
 
 uint8_t *extism_current_plugin_memory(ExtismCurrentPlugin *plugin);
 
@@ -91,6 +104,14 @@ ExtismSize extism_current_plugin_memory_length(ExtismCurrentPlugin *plugin, Exti
 void extism_current_plugin_memory_free(ExtismCurrentPlugin *plugin, ExtismMemoryHandle ptr);
 
 bool extism_log_file(const char *filename, const char *log_level);
+
+bool extism_log_custom(const char *log_level);
+
+void extism_log_drain(ExtismLogDrainFunctionType handler);
+
+const ExtismCancelHandle *extism_plugin_cancel_handle(const ExtismPlugin *plugin);
+
+bool extism_plugin_cancel(const ExtismCancelHandle *handle);
 
 static void host_function_caller (ExtismCurrentPlugin *plugin,
                                    const ExtismVal *inputs,
@@ -125,6 +146,24 @@ static void host_function_caller_cleanup(void *data) {
     sv_2mortal(data);
 }
 
+static void log_drain_caller(const char *data, ExtismSize size) {
+    dTHX;
+    dSP;
+
+	ENTER;
+    SAVETMPS;
+
+    PUSHMARK(SP);
+    EXTEND(SP, 1);
+    PUSHs(sv_2mortal(newSVpvn(data, size)));
+    PUTBACK;
+
+    call_pv("Extism::active_log_drain_func", G_DISCARD);
+
+    FREETMPS;
+    LEAVE;
+}
+
 typedef const void * PV;
 
 MODULE = Extism::XS		PACKAGE = Extism::XS
@@ -133,6 +172,7 @@ PROTOTYPES: DISABLE
 
 TYPEMAP: <<HERE
 ExtismPlugin * T_PTR
+const ExtismPlugin * T_PTR
 const uint8_t * T_PV
 ExtismSize T_UV
 const ExtismFunction ** T_PTR
@@ -144,6 +184,7 @@ ExtismFunction * T_PTR
 const ExtismValType * T_PTR
 ExtismCurrentPlugin * T_PTR
 ExtismMemoryHandle T_UV
+const ExtismCancelHandle * T_PTR
 PV T_PV
 HERE
 
@@ -163,7 +204,6 @@ plugin_new(wasm, wasm_size, functions, n_functions, with_wasi, errmsg)
     bool with_wasi
     char **errmsg
     CODE:
-        extism_log_file("/dev/stdout", "error");
         RETVAL = extism_plugin_new(wasm, wasm_size, functions, n_functions, with_wasi, errmsg);
     OUTPUT:
         RETVAL
@@ -223,6 +263,50 @@ plugin_reset(plugin)
     OUTPUT:
         RETVAL
 
+const void *
+plugin_id(plugin)
+    ExtismPlugin *plugin
+    CODE:
+        RETVAL = extism_plugin_id(plugin);
+    OUTPUT:
+        RETVAL
+
+bool
+plugin_function_exists(plugin, func_name)
+    ExtismPlugin *plugin
+    const char *func_name
+    CODE:
+        RETVAL = extism_plugin_function_exists(plugin, func_name);
+    OUTPUT:
+        RETVAL
+
+bool
+plugin_config(plugin, sv_json)
+    ExtismPlugin *plugin
+    SV *sv_json
+    CODE:
+        STRLEN json_len;
+        char *json = SvPV(sv_json, json_len);
+        RETVAL = extism_plugin_config(plugin, json, json_len);
+    OUTPUT:
+        RETVAL
+
+const ExtismCancelHandle *
+plugin_cancel_handle(plugin)
+    const ExtismPlugin *plugin
+    CODE:
+        RETVAL = extism_plugin_cancel_handle(plugin);
+    OUTPUT:
+        RETVAL
+
+bool
+plugin_cancel(cancel_handle)
+    const ExtismCancelHandle *cancel_handle
+    CODE:
+        RETVAL = extism_plugin_cancel(cancel_handle);
+    OUTPUT:
+        RETVAL
+
 ExtismFunction *
 function_new(name, inputs, n_inputs, outputs, n_outputs, data)
     const char *name
@@ -235,6 +319,19 @@ function_new(name, inputs, n_inputs, outputs, n_outputs, data)
         RETVAL = extism_function_new(name, inputs, n_inputs, outputs, n_outputs, &host_function_caller, SvREFCNT_inc(data), &host_function_caller_cleanup);
     OUTPUT:
         RETVAL
+
+void
+function_free(f)
+    ExtismFunction *f
+    CODE:
+        extism_function_free(f);
+
+void
+function_set_namespace(ptr, namespace_)
+    ExtismFunction *ptr
+    const char *namespace_
+    CODE:
+        extism_function_set_namespace(ptr, namespace_);
 
 void *
 current_plugin_memory(plugin)
@@ -269,6 +366,26 @@ current_plugin_memory_free(plugin, handle)
     ExtismMemoryHandle handle
     CODE:
         extism_current_plugin_memory_free(plugin, handle);
+
+void
+log_file(filename, log_level)
+    const char *filename
+    const char *log_level
+    CODE:
+        extism_log_file(filename, log_level);
+
+bool
+log_custom(log_level)
+    const char *log_level
+    CODE:
+        RETVAL = extism_log_custom(log_level);
+    OUTPUT:
+        RETVAL
+
+void
+log_drain()
+    CODE:
+        extism_log_drain(&log_drain_caller);
 
 void
 CopyToPtr(src, dest, n)

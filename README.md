@@ -27,8 +27,6 @@ To test and internet connection is required and you must have the [WASI SDK](htt
 `make test`
 
 ## TODO
-* Add bindings for `extism_log_file` and any other missing functions
-* Remove `extism_log_file` from XS
 * Switch back to using official `extism.h`
 * Create `Alien::Extism` distribution to automatically install libextism
 * Build `dists` with github actions
