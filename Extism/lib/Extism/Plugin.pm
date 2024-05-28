@@ -71,7 +71,6 @@ sub call {
         return undef unless wantarray;
         return (undef, $rc, plugin_error($$self));
     }
-    $rc == 0 or return undef;
     my $output_size = plugin_output_length($$self);
     my $output_ptr = plugin_output_data($$self);
     my $output = unpack('P'.$output_size, pack('Q', plugin_output_data($$self)));
