@@ -27,8 +27,6 @@ To test and internet connection is required and you must have the [WASI SDK](htt
 `make test`
 
 ## TODO
-* Switch back to using official `extism.h`
-* Create `Alien::Extism` distribution to automatically install libextism
 * Build `dists` with github actions
 * Release on CPAN
 * More host function / plugin->call bindings

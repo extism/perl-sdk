@@ -2,25 +2,30 @@ use 5.006;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
-use Alien::Base::Wrapper ();
+use Alien::Build::MM;
+ 
+my $abmm = Alien::Build::MM->new;
 
-my %WriteMakefileArgs = Alien::Base::Wrapper->new('Alien::libextism')->mm_args2(
-    NAME             => 'Extism',
-    AUTHOR           => q{Gavin Hayes <gavin@dylibso.com>},
-    VERSION_FROM     => 'lib/Extism.pm',
-    ABSTRACT_FROM    => 'lib/Extism.pm',
+my %WriteMakefileArgs = (
+$abmm->mm_args (
+    DISTNAME         => 'Alien-libextism',
+    NAME             => 'Alien::libextism',
+    AUTHOR           => "Gavin Hayes <gahayes\@cpan.org>",
+    VERSION_FROM     => 'lib/Alien/libextism.pm',
+    ABSTRACT_FROM    => 'lib/Alien/libextism.pm',
     LICENSE          => 'perl_5',
     MIN_PERL_VERSION => '5.006',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '0',
+        'Sort::Versions' => 0,
     },
     TEST_REQUIRES => {
         'Test::More' => '0',
     },
-    PREREQ_PM => {},
-    XSMULTI        => 1,
+    #PREREQ_PM => {
+    #},
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean => { FILES => 'Extism-*' },
+    clean => { FILES => 'Alien-libextism-*' },
     META_MERGE => {
         'meta-spec' => { version => 2 },
         resources => {
@@ -32,17 +37,10 @@ my %WriteMakefileArgs = Alien::Base::Wrapper->new('Alien::libextism')->mm_args2(
             bugtracker => {
                 web => 'https://github.com/extism/perl-sdk/issues'
             },
-            homepage   => 'https://github.com/extism/perl-sdk',
-        },
-        prereqs => {
-            configure => {
-                requires => {
-                    "Alien::libextism" => "v0.1.0",
-                }
-            }
+            homepage   => 'https://extism.org',
         },
     },
-);
+));
 
 # Compatibility with old versions of ExtUtils::MakeMaker
 unless (eval { ExtUtils::MakeMaker->VERSION('6.64'); 1 }) {
@@ -63,3 +61,6 @@ delete $WriteMakefileArgs{LICENSE}
     unless eval { ExtUtils::MakeMaker->VERSION('6.31'); 1 };
 
 WriteMakefile(%WriteMakefileArgs);
+sub MY::postamble {
+  $abmm->mm_postamble;
+}
