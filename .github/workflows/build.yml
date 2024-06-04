@@ -1,0 +1,132 @@
+
+# GitHub Actions CI script for Extism and Alien-libextism
+# (C) 2024 Dylibso
+
+name: Build Extism and Alien-libextism
+on:   [ push, pull_request ]
+
+jobs:
+  build-linux:
+    name:    Build Extism and Alien-libextism
+    runs-on: ubuntu-latest
+    steps:
+    - name: Fetch repo
+      uses: actions/checkout@v3
+      with:
+        path: 'perl-sdk'
+    - name: Install Perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: '5.38'
+    - name: Build and install Alien-libextism
+      run: |
+        cd perl-sdk/Alien-libextism
+        perl Makefile.PL
+        make manifest
+        make distcheck
+        make dist
+        make install
+    - name: Install wasi-sdk
+      run: |
+        wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk_22.0_amd64.deb
+        sudo dpkg -i wasi-sdk_22.0_amd64.deb
+    - name: Build Extism
+      run: |
+        cd perl-sdk
+        /opt/wasi-sdk/bin/clang -o Extism/host.wasm host.c -mexec-model=reactor
+        cd Extism
+        perl Makefile.PL
+        make manifest
+        make distcheck
+        make dist
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dists
+        path: |
+          perl-sdk/Alien-libextism/Alien-libextism-*.tar.gz
+          perl-sdk/Extism/Extism-*.tar.gz
+
+  test-install:
+    needs:   [ build-linux ]
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        perl: ['5.16', '5.36', '5.38']
+    runs-on: ${{ matrix.os }}
+    name: Test release with ${{ matrix.perl }} on ${{ matrix.os }}
+    steps:
+    - name: Fetch build artifacts
+      uses: actions/download-artifact@v3
+    - name: Rename to unversioned name
+      run: |
+        mv dists/Alien-libextism*.tar.gz Alien-libextism.tar.gz
+        mv dists/Extism*.tar.gz Extism.tar.gz
+    - name: Install Perl and dists using cpanm
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: ${{ matrix.perl }}
+        install-modules-with: cpanm
+        install-modules: Alien-libextism.tar.gz Extism.tar.gz
+    - name: Try loading Extism
+      run: |
+        perl -MExtism  -e 'print $Extism::VERSION . "\n";'
+    - name: Archive CPAN logs
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: cpan_log
+        path: /home/runner/.cpanm/work/*/build.log
+
+  test-manual-install:
+    name: test manual install
+    runs-on: ubuntu-latest
+    needs: [ build-linux ]
+    strategy:
+      matrix:
+        version: ['5.16', '5.36', '5.38']
+    steps:
+    - name: Install Perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: ${{ matrix.version }}
+    - name: Fetch build artifacts
+      uses: actions/download-artifact@v3
+    - name: Build, Test, Install Alien-libextism.tar.gz
+      run: |
+        mv dists/Alien-libextism*.tar.gz Alien-libextism.tar.gz
+        tar xvf Alien-libextism.tar.gz
+        rm Alien-libextism.tar.gz
+        cd Alien-libextism*
+        perl Makefile.PL
+        make
+        make test
+        make install
+    - name: Build, Test, Install Extism.tar.gz
+      run: |
+        mv dists/Extism*.tar.gz Extism.tar.gz
+        tar xvf Extism.tar.gz
+        rm Extism.tar.gz
+        cd Extism*
+        perl Makefile.PL
+        make
+        make test
+        make install
+
+  create-release:
+    name:    Create release
+    runs-on: ubuntu-latest
+    needs:   [ build-linux, test-install, test-manual-install ]
+    steps:
+    - name: Fetch build artifacts
+      if:   ${{ github.ref_type == 'tag' }}
+      uses: actions/download-artifact@v3
+    - name: Publish release
+      if:   ${{ github.ref_type == 'tag' }}
+      uses: softprops/action-gh-release@v1
+      with:
+        fail_on_unmatched_files: true
+        draft: true
+        files: |
+          dists/Alien-libextism-*.tar.gz
+          dists/Extism-*.tar.gz
