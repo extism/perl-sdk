@@ -12,7 +12,7 @@ BEGIN {
     use_ok( 'Extism::Plugin' ) || print "Bail out!\n";
     use_ok( 'Extism::CurrentPlugin' ) || print "Bail out!\n";
     use_ok( 'Extism::Function' ) || print "Bail out!\n";
-    use_ok( 'Extism::CancelHandle' ) || print "Bail out!\n";
+    use_ok( 'Extism::Plugin::CancelHandle' ) || print "Bail out!\n";
 }
 
 diag( "Testing Extism $Extism::VERSION, Perl $], $^X" );
