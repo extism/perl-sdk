@@ -171,9 +171,9 @@ my @highlevel;
     $highlevel[1] = $fplugin->call("count_vowels", $hello);
 }
 my @decoded = map {decode_json $_} @highlevel;
-ok($decoded[0]{count} == $decoded[1]{count} == 3);
-ok($decoded[0]{total} == 3);
-ok($decoded[1]{total} == 6);
+ok($decoded[0]->{count} == $decoded[1]->{count} == 3);
+ok($decoded[0]->{total} == 3);
+ok($decoded[1]->{total} == 6);
 
 # Verify both sets of results are the same
 is($highlevel[0], $lowlevel[0]);
