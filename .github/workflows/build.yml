@@ -58,7 +58,7 @@ jobs:
         os: ['ubuntu-latest']
         perl: ['5.16', '5.36', '5.38']
     runs-on: ${{ matrix.os }}
-    name: Test release with ${{ matrix.perl }} on ${{ matrix.os }}
+    name: Test install with ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
     - name: Fetch build artifacts
       uses: actions/download-artifact@v3
@@ -90,12 +90,17 @@ jobs:
       matrix:
         version: ['5.16', '5.36', '5.38']
     steps:
+    - name: Fetch repo
+      uses: actions/checkout@v3
+      with:
+        path: 'perl-sdk'
     - name: Install Perl
       uses: shogo82148/actions-setup-perl@v1
       with:
         perl-version: ${{ matrix.version }}
+        working-directory: perl-sdk
         install-modules-with: cpanm
-        install-modules: Alien::Build Alien::Build::MM
+        install-modules-args: --with-configure
     - name: Fetch build artifacts
       uses: actions/download-artifact@v3
     - name: Build, Test, Install Alien-libextism.tar.gz
