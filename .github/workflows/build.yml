@@ -29,6 +29,7 @@ jobs:
         make distcheck
         make dist
         make install
+        mv *.tar.gz ../
     - name: Install wasi-sdk
       run: |
         wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk_22.0_amd64.deb
@@ -42,13 +43,13 @@ jobs:
         make manifest
         make distcheck
         make dist
+        mv *.tar.gz ../
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: dists
         path: |
-          perl-sdk/Alien-libextism/Alien-libextism-*.tar.gz
-          perl-sdk/Extism/Extism-*.tar.gz
+          perl-sdk/*.tar.gz
 
   test-install:
     needs:   [ build-linux ]
