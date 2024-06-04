@@ -18,6 +18,9 @@ jobs:
       uses: shogo82148/actions-setup-perl@v1
       with:
         perl-version: '5.38'
+        working-directory: perl-sdk
+        install-modules-with: cpanm
+        install-modules-args: --with-develop --with-configure
     - name: Build and install Alien-libextism
       run: |
         cd perl-sdk/Alien-libextism
@@ -90,6 +93,8 @@ jobs:
       uses: shogo82148/actions-setup-perl@v1
       with:
         perl-version: ${{ matrix.version }}
+        install-modules-with: cpanm
+        install-modules: Alien::Build Alien::Build::MM
     - name: Fetch build artifacts
       uses: actions/download-artifact@v3
     - name: Build, Test, Install Alien-libextism.tar.gz
