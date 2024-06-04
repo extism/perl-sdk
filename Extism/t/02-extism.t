@@ -7,7 +7,7 @@ use Extism ':all';
 use JSON::PP qw(encode_json decode_json);
 use File::Temp qw(tempfile);
 use Devel::Peek qw(Dump);
-plan tests => 39;
+plan tests => 40;
 
 # ...
 ok(Extism::version());
@@ -171,9 +171,10 @@ my @highlevel;
     $highlevel[1] = $fplugin->call("count_vowels", $hello);
 }
 my @decoded = map {decode_json $_} @highlevel;
-ok($decoded[0]->{count} == $decoded[1]->{count} == 3);
-ok($decoded[0]->{total} == 3);
-ok($decoded[1]->{total} == 6);
+ok($decoded[0]{count} == 3);
+ok($decoded[0]{count} == $decoded[1]{count});
+ok($decoded[0]{total} == 3);
+ok($decoded[1]{total} == 6);
 
 # Verify both sets of results are the same
 is($highlevel[0], $lowlevel[0]);
