@@ -1,4 +1,4 @@
-use 5.006;
+use 5.016;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
@@ -6,11 +6,11 @@ use Alien::Base::Wrapper ();
 
 my %WriteMakefileArgs = Alien::Base::Wrapper->new('Alien::libextism')->mm_args2(
     NAME             => 'Extism',
-    AUTHOR           => q{Gavin Hayes <gavin@dylibso.com>},
+    AUTHOR           => q{Extism Authors <extism@cpan.org>},
     VERSION_FROM     => 'lib/Extism.pm',
     ABSTRACT_FROM    => 'lib/Extism.pm',
     LICENSE          => 'perl_5',
-    MIN_PERL_VERSION => '5.006',
+    MIN_PERL_VERSION => '5.016',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '0',
     },

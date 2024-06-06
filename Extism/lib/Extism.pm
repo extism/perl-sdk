@@ -1,12 +1,14 @@
 package Extism;
 
-use 5.006;
+use 5.016;
 use strict;
 use warnings;
 use Extism::XS qw(version log_file);
 use Extism::Plugin;
 use Extism::Function ':all';
 use Exporter 'import';
+use version 0.77;
+our $VERSION = qv(v0.1.0);
 
 sub log_custom {
   my ($level) = @_;
@@ -33,92 +35,44 @@ our @EXPORT_OK = qw(
 our %EXPORT_TAGS;
 $EXPORT_TAGS{all} = [@EXPORT_OK];
 
+1;
+
+__END__
+
 =head1 NAME
 
-Extism - The great new Extism!
+Extism - Extism Perl SDK
 
-=head1 VERSION
+=head1 DESCRIPTION
 
-Version 0.01
-
-=cut
-
-use version 0.77; our $VERSION = qv(v0.0.1);
-
+Extism L<https://extism.org/> is a cross-language framework for building
+with WebAssembly. This distribution integrates Extism into Perl so Perl
+programmers can easily use WebAssembly. Possibily to add a Plugin system
+into their application or to integrate native deps without the headache
+of native builds.
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+    use Extism ':all';
+    my $wasm = do { local(@ARGV, $/) = 'count_vowels.wasm'; <> };
+    my $plugin = Extism::Plugin->new($wasm, {wasi => 1});
+    my $output = $plugin->call('count_vowels', "this is a test");
 
-Perhaps a little code snippet.
+=head1 EXAMPLES
 
-    use Extism;
+See script/demo-perl-extism and t/02-extism.t
 
-    my $foo = Extism->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
-
-=head2 function1
-
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
-
-=head1 AUTHOR
-
-Gavin Hayes, C<< <gavin at dylibso.com> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to C<bug-extism at rt.cpan.org>, or through
-the web interface at L<https://rt.cpan.org/NoAuth/ReportBug.html?Queue=Extism>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
-
-=head1 SUPPORT
+=head1 SUPPORT AND DOCUMENTATION
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Extism
 
+Additional documentation, support, and bug reports can be found at the
+Extism perl-sdk repository L<https://github.com/extism/perl-sdk>
 
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=Extism>
-
-=item * CPAN Ratings
-
-L<https://cpanratings.perl.org/d/Extism>
-
-=item * Search CPAN
-
-L<https://metacpan.org/release/Extism>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
-
+Additional Extism support may be found in the discord server:
+L<https://extism.org/discord>
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -129,5 +83,3 @@ the same terms as the Perl 5 programming language system itself.
 
 
 =cut
-
-1; # End of Extism

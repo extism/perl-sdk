@@ -6,15 +6,9 @@ Join the [Extism Discord](https://extism.org/discord) and chat with us!
 
 ## Building and Installation
 
-This isn't on CPAN yet, so libextism and the Extism distribution must be installed manually:
-
-[libextism](https://extism.org/docs/install)
-
 Installation under [`local::lib`](https://metacpan.org/pod/local::lib#The-bootstrapping-technique) is recommended. 
 
-```bash
-make install
-```
+From CPAN: `cpanm Extism`
 
 ## Getting Started
 
@@ -27,6 +21,4 @@ To test and internet connection is required and you must have the [WASI SDK](htt
 `make test`
 
 ## TODO
-* Build `dists` with github actions
-* Release on CPAN
 * More host function / plugin->call bindings

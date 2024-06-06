@@ -1,6 +1,6 @@
 package Extism::Plugin::CancelHandle;
 
-use 5.006;
+use 5.016;
 use strict;
 use warnings;
 use Extism::XS qw(plugin_cancel);

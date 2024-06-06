@@ -1,10 +1,11 @@
 package Alien::libextism;
 
-use 5.006;
+use 5.016;
 use strict;
 use warnings;
 use parent qw( Alien::Base );
-use version; our $VERSION = version->declare("v0.2.0");
+use version 0.77;
+our $VERSION = qv(v0.1.0);
 
 1;
 
@@ -19,10 +20,6 @@ __END__
 Alien::libextism - find or build and install libextism with development
 dependencies
 
-=head1 AUTHOR
-
-Gavin Hayes, C<< <gahayes at cpan.org> >>
-
 =head1 SUPPORT AND DOCUMENTATION
 
 You can find documentation for this module with the perldoc command.
@@ -31,6 +28,9 @@ You can find documentation for this module with the perldoc command.
 
 Additional documentation, support, and bug reports can be found at the
 Extism perl-sdk repository L<https://github.com/extism/perl-sdk>
+
+Additional Extism support may be found in the discord server:
+L<https://extism.org/discord>
 
 =head1 LICENSE AND COPYRIGHT
 

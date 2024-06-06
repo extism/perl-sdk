@@ -1,4 +1,4 @@
-use 5.006;
+use 5.016;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
@@ -10,11 +10,11 @@ my %WriteMakefileArgs = (
 $abmm->mm_args (
     DISTNAME         => 'Alien-libextism',
     NAME             => 'Alien::libextism',
-    AUTHOR           => "Gavin Hayes <gahayes\@cpan.org>",
+    AUTHOR           => 'Extism Authors <extism@cpan.org>',
     VERSION_FROM     => 'lib/Alien/libextism.pm',
     ABSTRACT_FROM    => 'lib/Alien/libextism.pm',
     LICENSE          => 'perl_5',
-    MIN_PERL_VERSION => '5.006',
+    MIN_PERL_VERSION => '5.016',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '0',
         'Sort::Versions' => 0,

@@ -1,5 +1,5 @@
 #!perl
-use 5.006;
+use 5.016;
 use strict;
 use warnings;
 use Test::More;
@@ -111,7 +111,8 @@ ok(defined $fplugin->call('call_hello_params'));
 my $count_vowels_kv = encode_json({
     wasm => [
         {
-            url => "https://github.com/extism/plugins/releases/latest/download/count_vowels_kvstore.wasm"
+            #url => "https://github.com/extism/plugins/releases/latest/download/count_vowels_kvstore.wasm"
+            path => 'count_vowels_kvstore.wasm',
         }
     ],
 });

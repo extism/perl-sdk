@@ -1,16 +1,6 @@
 Extism
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
-
-A README file is required for CPAN modules since CPAN extracts the README
-file from a module distribution so that people browsing the archive
-can use it to get an idea of the module's uses. It is usually a good idea
-to provide version information here so that people can decide whether
-fixes for the module are worth downloading.
-
+Extism https://extism.org/ Perl SDK
 
 INSTALLATION
 
@@ -28,16 +18,11 @@ perldoc command.
 
     perldoc Extism
 
-You can also look for information at:
+Additional documentation, support, and bug reports can be found at the
+Extism perl-sdk repository https://github.com/extism/perl-sdk
 
-    RT, CPAN's request tracker (report bugs here)
-        https://rt.cpan.org/NoAuth/Bugs.html?Dist=Extism
-
-    CPAN Ratings
-        https://cpanratings.perl.org/d/Extism
-
-    Search CPAN
-        https://metacpan.org/release/Extism
+Additional Extism support may be found in the discord server:
+https://extism.org/discord
 
 
 LICENSE AND COPYRIGHT

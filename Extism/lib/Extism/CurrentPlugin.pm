@@ -1,6 +1,6 @@
 package Extism::CurrentPlugin;
 
-use 5.006;
+use 5.016;
 use strict;
 use warnings;
 use feature 'say';
