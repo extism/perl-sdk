@@ -12,3 +12,8 @@ Extism/script/demo-perl-extism-3
 Extism/MANIFEST
 Extism/MANIFEST.bak
 Extism/*.tar.gz
+examples/Extism-AudioDecoder/*.flac
+examples/Extism-AudioDecoder/*.wav
+examples/Extism-AudioDecoder/*.pcm
+examples/Extism-AudioDecoder/.vscode
+examples/CountVowels/.vscode
