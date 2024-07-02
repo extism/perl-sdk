@@ -20,5 +20,9 @@ To test and internet connection is required and you must have the [WASI SDK](htt
 
 `make test`
 
+## Presentation
+
+The Extism perl-sdk was featured at TPRC 2024: [Native deps a pain? WebAssembly can help!](https://www.youtube.com/watch?v=7THl2DSbZNc) Slides are in `docs/`.
+
 ## TODO
 * More host function / plugin->call bindings
