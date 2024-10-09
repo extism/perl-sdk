@@ -91,6 +91,7 @@ sub set_namespace {
 
 sub load_raw_array {
   my ($ptr, $elm_size, $n) = @_;
+  $n or return [];
   my $input_array = unpack('P'.($elm_size * $n), pack('Q', $ptr));
   my @input_packed = unpack("(a$elm_size)*", $input_array);
   return \@input_packed;
@@ -98,9 +99,8 @@ sub load_raw_array {
 
 sub host_function_caller_perl {
     my ($current_plugin, $input_ptr, $input_len, $output_ptr, $output_len, $user_data) = @_;
-    #print Dumper(\@_);
     local $Extism::CurrentPlugin::instance = $current_plugin;
-    my $input_packed = \@{load_raw_array($input_ptr, 16, $input_len)};
+    my $input_packed = load_raw_array($input_ptr, 16, $input_len);
     my @input = map {
       my $type = unpack('L', $_);
       my $value = substr($_, 8);
@@ -126,6 +126,7 @@ sub host_function_caller_perl {
     }
     my @outputs = $user_data->{func}(@input);
     scalar(@outputs) <= $output_len or croak "host function returned too many outputs";
+    $output_len or return;
     {
         my $i = 0;
         foreach my $item (@{$user_data->{conversions}{outputs}}) {
