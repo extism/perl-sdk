@@ -1,8 +1,11 @@
 .PHONY: all
-all: Extism Extism/host.wasm
+all: Extism Extism/host.wasm Extism/unreachable.wasm
 
 Extism/host.wasm: host.c
 	$(WASI_SDK_PATH)/bin/clang -o $@ $^ -mexec-model=reactor
+
+Extism/unreachable.wasm: unreachable.cpp
+	$(WASI_SDK_PATH)/bin/clang++ -fno-exceptions -o $@ $^ -mexec-model=reactor
 
 Extism/Makefile: Extism/Makefile.PL
 	cd Extism && perl Makefile.PL

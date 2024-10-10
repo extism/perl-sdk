@@ -1,4 +1,5 @@
 Extism/host.wasm
+Extism/unreachable.wasm
 Extism/MYMETA.json
 Extism/MYMETA.yml
 Extism/Makefile
@@ -17,3 +18,9 @@ examples/Extism-AudioDecoder/*.wav
 examples/Extism-AudioDecoder/*.pcm
 examples/Extism-AudioDecoder/.vscode
 examples/CountVowels/.vscode
+Alien-libextism/MYMETA.json
+Alien-libextism/MYMETA.yml
+Alien-libextism/Makefile
+Alien-libextism/_alien/
+Alien-libextism/blib/
+Alien-libextism/pm_to_blib

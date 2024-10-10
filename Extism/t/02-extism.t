@@ -7,7 +7,7 @@ use Extism ':all';
 use JSON::PP qw(encode_json decode_json);
 use File::Temp qw(tempfile);
 use Devel::Peek qw(Dump);
-plan tests => 40;
+plan tests => 44;
 
 # ...
 ok(Extism::version());
@@ -180,3 +180,18 @@ ok($decoded[1]{total} == 6);
 # Verify both sets of results are the same
 is($highlevel[0], $lowlevel[0]);
 is($highlevel[1], $lowlevel[1]);
+
+# test unreachable plugin
+my $unreachable = encode_json({
+    wasm => [
+        {
+            path => 'unreachable.wasm',
+        }
+    ],
+});
+my $uplugin = Extism::Plugin->new($unreachable, {wasi => 1});
+ok($uplugin);
+my ($ures, $urc, $uinfo) = $uplugin->call('do_unreachable');
+ok(!defined $ures);
+ok($urc != 0);
+ok($uinfo);
