@@ -1,5 +1,8 @@
 .PHONY: all
-all: Extism Extism/host.wasm Extism/unreachable.wasm
+all: Extism wasm
+
+.PHONY: wasm
+wasm: Extism/host.wasm Extism/unreachable.wasm
 
 Extism/host.wasm: host.c
 	$(WASI_SDK_PATH)/bin/clang -o $@ $^ -mexec-model=reactor
