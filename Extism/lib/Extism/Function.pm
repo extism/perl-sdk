@@ -71,9 +71,9 @@ sub new {
     my $output_types_array = pack('L*', @outputs);
     my $output_types_ptr = unpack('Q', pack('P', $output_types_array));
     my $function = function_new($name, $input_types_ptr, scalar(@inputs), $output_types_ptr, scalar(@outputs), \%hostdata);
-    $function or return undef;
+    $function or croak("Failed to create function, is the name valid?");
     my $functionref = bless \$function, $class;
-    defined $namespace and $functionref->($namespace);
+    defined $namespace and $functionref->set_namespace($namespace);
     return $functionref;
 }
 
@@ -87,7 +87,6 @@ sub set_namespace {
     my ($self, $namespace) = @_;
     function_set_namespace($$self, $namespace);
 }
-
 
 sub load_raw_array {
   my ($ptr, $elm_size, $n) = @_;
