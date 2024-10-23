@@ -24,7 +24,8 @@ use Data::Dumper qw(Dumper);
 use Devel::Peek qw(Dump);
 use JSON::PP qw(encode_json);
 use Scalar::Util qw(reftype);
-use version 0.77; our $VERSION = qv(v0.0.1);
+use version 0.77;
+our $VERSION = qv(v0.2.0);
 
 sub new {
     my ($name, $wasm, $options) = @_;

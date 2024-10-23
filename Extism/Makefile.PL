@@ -18,9 +18,6 @@ my %WriteMakefileArgs = Alien::Base::Wrapper->new('Alien::libextism')->mm_args2(
     ABSTRACT_FROM    => 'lib/Extism.pm',
     LICENSE          => 'perl_5',
     MIN_PERL_VERSION => '5.016',
-    CONFIGURE_REQUIRES => {
-        'ExtUtils::MakeMaker' => '0',
-    },
     TEST_REQUIRES => {
         'Test::More' => '0',
     },
@@ -44,7 +41,7 @@ my %WriteMakefileArgs = Alien::Base::Wrapper->new('Alien::libextism')->mm_args2(
         prereqs => {
             configure => {
                 requires => {
-                    "Alien::libextism" => "v0.1.0",
+                    "Alien::libextism" => "v0.1.1",
                 }
             }
         },
