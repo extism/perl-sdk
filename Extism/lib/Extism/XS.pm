@@ -33,6 +33,7 @@ our @EXPORT_OK = qw(
     current_plugin_memory_alloc
     current_plugin_memory_length
     current_plugin_memory_free
+    current_plugin_host_context
     log_file
     log_custom
     log_drain

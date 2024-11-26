@@ -59,14 +59,14 @@ sub new {
 # passed to the plugin. If INPUT is a reference, the referenced item will be
 # encoded with json and then passed to the plugin.
 sub call {
-    my ($self, $func_name, $input) = @_;
+    my ($self, $func_name, $input, $host_context) = @_;
     $input //= '';
     my $type = reftype($input);
     if ($type) {
         $input = $$input if($type eq 'SCALAR');
         $input = encode_json($input);
     }
-    my $rc = plugin_call($$self, $func_name, $input, length($input));
+    my $rc = plugin_call($$self, $func_name, $input, length($input), $host_context);
     if ($rc != 0) {
         die Extism::Plugin::CallException->new($rc, plugin_error($$self));
     }
