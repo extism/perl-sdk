@@ -8,6 +8,7 @@ use Extism::XS qw(current_plugin_memory
     current_plugin_memory_alloc
     current_plugin_memory_length
     current_plugin_memory_free
+    current_plugin_host_context
     CopyToPtr);
 
 use version 0.77;
@@ -51,6 +52,10 @@ sub memory_alloc_and_store {
     $ptr or return 0;
     CopyToPtr($scalar, memory() + $ptr, length($scalar));
     return $ptr;
+}
+
+sub host_context {
+    current_plugin_host_context($Extism::CurrentPlugin::instance)
 }
 
 1; # End of Extism::CurrentPlugin

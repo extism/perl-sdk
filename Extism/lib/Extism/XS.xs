@@ -109,13 +109,14 @@ plugin_new_error_free(err);
         extism_plugin_new_error_free(err);
 
 int32_t
-plugin_call(plugin, func_name, data, data_len)
+plugin_call(plugin, func_name, data, data_len, host_context=&PL_sv_undef)
     ExtismPlugin *plugin
     const char *func_name
     const uint8_t *data
     ExtismSize data_len
+    SV *host_context
     CODE:
-        RETVAL = extism_plugin_call(plugin, func_name, data, data_len);
+        RETVAL = extism_plugin_call_with_host_context(plugin, func_name, data, data_len, host_context);
     OUTPUT:
         RETVAL
 
@@ -260,6 +261,17 @@ current_plugin_memory_free(plugin, handle)
     ExtismMemoryHandle handle
     CODE:
         extism_current_plugin_memory_free(plugin, handle);
+
+SV *
+current_plugin_host_context(plugin)
+    ExtismCurrentPlugin *plugin
+    CODE:
+        RETVAL = extism_current_plugin_host_context(plugin);
+        if (RETVAL != &PL_sv_undef) {
+            SvREFCNT_inc_simple_NN(RETVAL);
+        }
+    OUTPUT:
+        RETVAL
 
 void
 log_file(filename, log_level)
