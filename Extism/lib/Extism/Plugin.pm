@@ -6,6 +6,7 @@ use warnings;
 use Carp qw(croak);
 use Extism::XS qw(
     plugin_new
+    plugin_new_with_fuel_limit
     plugin_new_error_free
     plugin_call
     plugin_error
@@ -31,6 +32,7 @@ sub new {
     my ($name, $wasm, $options) = @_;
     my $functions = [];
     my $with_wasi = 0;
+    my $fuel_limit;
     if ($options) {
         if (exists $options->{functions}) {
             $functions = $options->{functions};
@@ -38,13 +40,18 @@ sub new {
         if (exists $options->{wasi}) {
             $with_wasi = $options->{wasi};
         }
+        if (exists $options->{fuel_limit}) {
+            $fuel_limit = $options->{fuel_limit};
+        }
     }
     my $errptr = "\x00" x 8;
     my $errptrptr = unpack('Q', pack('P', $errptr));
     my @rawfunctions = map {$$_} @{$functions};
     my $functionsarray = pack('Q*', @rawfunctions);
     my $functionsptr = unpack('Q', pack('P', $functionsarray));
-    my $plugin = plugin_new($wasm, length($wasm), $functionsptr, scalar(@rawfunctions), $with_wasi, $errptrptr);
+    my $plugin = ! defined $fuel_limit
+    ? plugin_new($wasm, length($wasm), $functionsptr, scalar(@rawfunctions), $with_wasi, $errptrptr)
+    : plugin_new_with_fuel_limit($wasm, length($wasm), $functionsptr, scalar(@rawfunctions), $with_wasi, $fuel_limit, $errptrptr);
     if (! $plugin) {
         my $errmsg = unpack('p', $errptr);
         plugin_new_error_free(unpack('Q', $errptr));

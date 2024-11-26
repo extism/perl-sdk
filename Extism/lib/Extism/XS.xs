@@ -80,6 +80,7 @@ ExtismCurrentPlugin * T_PTR
 ExtismMemoryHandle T_UV
 const ExtismCancelHandle * T_PTR
 PV T_PV
+uint64_t T_UV
 HERE
 
 const char *
@@ -99,6 +100,20 @@ plugin_new(wasm, wasm_size, functions, n_functions, with_wasi, errmsg)
     char **errmsg
     CODE:
         RETVAL = extism_plugin_new(wasm, wasm_size, functions, n_functions, with_wasi, errmsg);
+    OUTPUT:
+        RETVAL
+
+ExtismPlugin *
+plugin_new_with_fuel_limit(wasm, wasm_size, functions, n_functions, with_wasi, fuel_limit, errmsg)
+    const uint8_t *wasm
+    ExtismSize wasm_size
+    const ExtismFunction **functions
+    ExtismSize n_functions
+    bool with_wasi
+    uint64_t fuel_limit
+    char **errmsg
+    CODE:
+        RETVAL = extism_plugin_new_with_fuel_limit(wasm, wasm_size, functions, n_functions, with_wasi, fuel_limit, errmsg);
     OUTPUT:
         RETVAL
 
