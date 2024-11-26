@@ -14,6 +14,7 @@ XSLoader::load('Extism::XS', $VERSION);
 our @EXPORT_OK = qw(
     version
     plugin_new
+    plugin_new_with_fuel_limit
     plugin_new_error_free
     plugin_call
     plugin_error
