@@ -7,6 +7,7 @@ use Carp qw(croak);
 use Extism::XS qw(
     plugin_new
     plugin_new_with_fuel_limit
+    plugin_allow_http_response_headers
     plugin_new_error_free
     plugin_call
     plugin_error
@@ -33,6 +34,7 @@ sub new {
     my $functions = [];
     my $with_wasi = 0;
     my $fuel_limit;
+    my $allow_http_response_headers;
     if ($options) {
         if (exists $options->{functions}) {
             $functions = $options->{functions};
@@ -42,6 +44,9 @@ sub new {
         }
         if (exists $options->{fuel_limit}) {
             $fuel_limit = $options->{fuel_limit};
+        }
+        if (exists $options->{allow_http_response_headers}) {
+            $allow_http_response_headers = $options->{allow_http_response_headers};
         }
     }
     my $errptr = "\x00" x 8;
@@ -56,6 +61,9 @@ sub new {
         my $errmsg = unpack('p', $errptr);
         plugin_new_error_free(unpack('Q', $errptr));
         croak $errmsg;
+    }
+    if ($allow_http_response_headers) {
+        plugin_allow_http_response_headers($plugin);
     }
     bless \$plugin, $name
 }
