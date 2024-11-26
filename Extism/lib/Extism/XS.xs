@@ -118,7 +118,13 @@ plugin_new_with_fuel_limit(wasm, wasm_size, functions, n_functions, with_wasi, f
         RETVAL
 
 void
-plugin_new_error_free(err);
+plugin_allow_http_response_headers(plugin)
+    ExtismPlugin *plugin
+    CODE:
+        extism_plugin_allow_http_response_headers(plugin);
+
+void
+plugin_new_error_free(err)
     void *err
     CODE:
         extism_plugin_new_error_free(err);

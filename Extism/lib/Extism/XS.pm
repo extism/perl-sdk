@@ -15,6 +15,7 @@ our @EXPORT_OK = qw(
     version
     plugin_new
     plugin_new_with_fuel_limit
+    plugin_allow_http_response_headers
     plugin_new_error_free
     plugin_call
     plugin_error
