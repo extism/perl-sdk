@@ -4,6 +4,7 @@ use 5.016;
 use strict;
 use warnings;
 use Extism::XS qw(version log_file);
+use Extism::CompiledPlugin;
 use Extism::Plugin;
 use Extism::Function ':all';
 use Exporter 'import';

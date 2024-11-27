@@ -39,6 +39,9 @@ our @EXPORT_OK = qw(
     log_file
     log_custom
     log_drain
+    compiled_plugin_new
+    compiled_plugin_free
+    plugin_new_from_compiled
     CopyToPtr
 );
 

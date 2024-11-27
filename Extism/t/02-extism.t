@@ -7,7 +7,7 @@ use Extism ':all';
 use JSON::PP qw(encode_json decode_json);
 use File::Temp qw(tempfile);
 use Devel::Peek qw(Dump);
-plan tests => 51;
+plan tests => 54;
 
 # ...
 ok(Extism::version());
@@ -260,4 +260,21 @@ ok($@->{message});
 {
     my $plugin = Extism::Plugin->new($wasm, {wasi => 1, allow_http_response_headers => 1});
     ok($plugin);
+}
+
+# compiled plugin
+{
+    my $compiled = Extism::CompiledPlugin->new($wasm, {wasi => 1});
+    for (1..2) {
+        my $plugin = Extism::Plugin->new($compiled);
+        my $output = $plugin->call('count_vowels', "this is a test");
+        my $outputhash = decode_json($output);
+        ok($outputhash->{count} == 4);
+    }
+}
+{
+    eval {
+        Extism::CompiledPlugin->new($wasm, {wasi => 1, fuel_limit => 20});
+    };
+    ok($@);
 }

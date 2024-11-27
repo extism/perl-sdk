@@ -81,12 +81,42 @@ ExtismMemoryHandle T_UV
 const ExtismCancelHandle * T_PTR
 PV T_PV
 uint64_t T_UV
+ExtismCompiledPlugin * T_PTR
+const ExtismCompiledPlugin * T_PTR
 HERE
 
 const char *
 version()
     CODE:
         RETVAL = extism_version();
+    OUTPUT:
+        RETVAL
+
+ExtismCompiledPlugin *
+compiled_plugin_new(wasm, wasm_size, functions, n_functions, with_wasi, errmsg)
+    const uint8_t *wasm
+    ExtismSize wasm_size
+    const ExtismFunction **functions
+    ExtismSize n_functions
+    bool with_wasi
+    char **errmsg
+    CODE:
+        RETVAL = extism_compiled_plugin_new(wasm, wasm_size, functions, n_functions, with_wasi, errmsg);
+    OUTPUT:
+        RETVAL
+
+void
+compiled_plugin_free(compiled_plugin)
+    ExtismCompiledPlugin *compiled_plugin
+    CODE:
+        extism_compiled_plugin_free(compiled_plugin);
+
+ExtismPlugin *
+plugin_new_from_compiled(compiled_plugin, errmsg)
+    const ExtismCompiledPlugin *compiled_plugin
+    char **errmsg
+    CODE:
+        RETVAL = extism_plugin_new_from_compiled(compiled_plugin, errmsg);
     OUTPUT:
         RETVAL
 

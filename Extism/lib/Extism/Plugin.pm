@@ -7,6 +7,7 @@ use Carp qw(croak);
 use Extism::XS qw(
     plugin_new
     plugin_new_with_fuel_limit
+    plugin_new_from_compiled
     plugin_allow_http_response_headers
     plugin_new_error_free
     plugin_call
@@ -22,6 +23,7 @@ use Extism::XS qw(
     );
 use Extism::Plugin::CallException;
 use Extism::Plugin::CancelHandle;
+use Extism::CompiledPlugin qw(BuildPluginNewParams);
 use Data::Dumper qw(Dumper);
 use Devel::Peek qw(Dump);
 use JSON::PP qw(encode_json);
@@ -31,38 +33,26 @@ our $VERSION = qv(v0.2.0);
 
 sub new {
     my ($name, $wasm, $options) = @_;
-    my $functions = [];
-    my $with_wasi = 0;
-    my $fuel_limit;
-    my $allow_http_response_headers;
-    if ($options) {
-        if (exists $options->{functions}) {
-            $functions = $options->{functions};
-        }
-        if (exists $options->{wasi}) {
-            $with_wasi = $options->{wasi};
-        }
-        if (exists $options->{fuel_limit}) {
-            $fuel_limit = $options->{fuel_limit};
-        }
-        if (exists $options->{allow_http_response_headers}) {
-            $allow_http_response_headers = $options->{allow_http_response_headers};
-        }
+    my ($plugin, $opt, $errptr);
+    if (!ref($wasm) || !$wasm->isa('Extism::CompiledPlugin')) {
+        $opt = defined $options ? {%$options} : {};
+        my $p = BuildPluginNewParams($wasm, $opt);
+        $plugin = ! defined $p->{fuel_limit}
+            ? plugin_new($p->{wasm}, length($p->{wasm}), $p->{functions}, $p->{n_functions}, $p->{wasi}, $p->{errmsg})
+            : plugin_new_with_fuel_limit($p->{wasm}, length($p->{wasm}), $p->{functions}, $p->{n_functions}, $p->{wasi}, $p->{fuel_limit}, $p->{errmsg});
+        $errptr = $p->{errptr};
+    } else {
+        $opt = $wasm->{options};
+        $errptr = "\x00" x 8;
+        my $errmsg = unpack('Q', pack('P', $errptr));
+        $plugin = plugin_new_from_compiled($wasm->{compiled}, $errmsg);
     }
-    my $errptr = "\x00" x 8;
-    my $errptrptr = unpack('Q', pack('P', $errptr));
-    my @rawfunctions = map {$$_} @{$functions};
-    my $functionsarray = pack('Q*', @rawfunctions);
-    my $functionsptr = unpack('Q', pack('P', $functionsarray));
-    my $plugin = ! defined $fuel_limit
-    ? plugin_new($wasm, length($wasm), $functionsptr, scalar(@rawfunctions), $with_wasi, $errptrptr)
-    : plugin_new_with_fuel_limit($wasm, length($wasm), $functionsptr, scalar(@rawfunctions), $with_wasi, $fuel_limit, $errptrptr);
     if (! $plugin) {
         my $errmsg = unpack('p', $errptr);
         plugin_new_error_free(unpack('Q', $errptr));
         croak $errmsg;
     }
-    if ($allow_http_response_headers) {
+    if ($opt->{allow_http_response_headers}) {
         plugin_allow_http_response_headers($plugin);
     }
     bless \$plugin, $name
