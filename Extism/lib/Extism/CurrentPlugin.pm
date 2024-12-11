@@ -1,4 +1,4 @@
-package Extism::CurrentPlugin;
+package Extism::CurrentPlugin v0.3.0;
 
 use 5.016;
 use strict;
@@ -10,9 +10,6 @@ use Extism::XS qw(current_plugin_memory
     current_plugin_memory_free
     current_plugin_host_context
     CopyToPtr);
-
-use version 0.77;
-our $VERSION = qv(v0.2.0);
 
 # These functions are only valid within a host function
 # instance is set by Extism::Function::host_function_caller_perl, valid only for

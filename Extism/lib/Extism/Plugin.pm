@@ -1,4 +1,4 @@
-package Extism::Plugin;
+package Extism::Plugin v0.3.0;
 
 use 5.016;
 use strict;
@@ -28,8 +28,6 @@ use Data::Dumper qw(Dumper);
 use Devel::Peek qw(Dump);
 use JSON::PP qw(encode_json);
 use Scalar::Util qw(reftype);
-use version 0.77;
-our $VERSION = qv(v0.2.0);
 
 sub new {
     my ($name, $wasm, $options) = @_;
