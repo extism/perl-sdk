@@ -1,4 +1,4 @@
-package Extism::CompiledPlugin;
+package Extism::CompiledPlugin v0.3.0;
 
 use 5.016;
 use strict;
@@ -11,8 +11,6 @@ use Extism::XS qw(
 use Exporter 'import';
 use Data::Dumper qw(Dumper);
 use Devel::Peek qw(Dump);
-use version 0.77;
-our $VERSION = qv(v0.2.0);
 
 our @EXPORT_OK = qw(BuildPluginNewParams);
 

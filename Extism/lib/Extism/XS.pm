@@ -1,14 +1,11 @@
-package Extism::XS;
-
+package Extism::XS v0.3.0;
 use 5.016;
 use strict;
 use warnings;
 use Exporter 'import';
 
-use version 0.77;
-our $VERSION = qv(v0.2.0);
-
 require XSLoader;
+our $VERSION;
 XSLoader::load('Extism::XS', $VERSION);
 
 our @EXPORT_OK = qw(
