@@ -47,7 +47,7 @@ jobs:
         make dist
         mv *.tar.gz ../
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dists
         path: |
@@ -63,7 +63,7 @@ jobs:
     name: Test install with ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
     - name: Fetch build artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
     - name: Rename to unversioned name
       run: |
         mv dists/Alien-libextism*.tar.gz Alien-libextism.tar.gz
@@ -79,7 +79,7 @@ jobs:
         perl -MExtism  -e 'print $Extism::VERSION . "\n";'
     - name: Archive CPAN logs
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: cpan_log
         path: /home/runner/.cpanm/work/*/build.log
@@ -104,7 +104,7 @@ jobs:
         install-modules-with: cpanm
         install-modules-args: --with-configure
     - name: Fetch build artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
     - name: Build, Test, Install Alien-libextism.tar.gz
       run: |
         mv dists/Alien-libextism*.tar.gz Alien-libextism.tar.gz
@@ -133,7 +133,7 @@ jobs:
     steps:
     - name: Fetch build artifacts
       if:   ${{ github.ref_type == 'tag' }}
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
     - name: Publish release
       if:   ${{ github.ref_type == 'tag' }}
       uses: softprops/action-gh-release@v1
